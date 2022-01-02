@@ -12,12 +12,18 @@ require('electron-reload')(__dirname, {
 const createWindow = () => {
     // ブラウザウインドウを作成します。
     const mainWindow = new BrowserWindow({
-        width: 1800,
-        height: 600,
+        'fullscreen': true,
+        frame: false,
+        titleBarStyle: 'hidden',
+        autoHideMenuBar: true,
         webPreferences: {
             preload: path.join(__dirname, 'preload.js')
         }
     })
+
+    mainWindow.maximize();
+
+    mainWindow.setWindowButtonVisibility(false)
 
     // そしてアプリの index.html を読み込みます。
     mainWindow.loadFile('./index.html')
