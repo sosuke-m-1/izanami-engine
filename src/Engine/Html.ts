@@ -1,5 +1,6 @@
 import { ReactElement } from "react";
 import * as CSS from 'csstype';
+import { renderToStaticMarkup } from 'react-dom/server';
 
 type DrawHtml = (
     context: CanvasRenderingContext2D,
@@ -11,7 +12,9 @@ type DrawHtml = (
 
 export const drawHtml: DrawHtml = (context, html, x = 0, y = 0, styles = {}) => {
     if (typeof html.props.children === 'string') {
-        drawText(context, html.props.children, { color: 'red' });
+        drawText(context, html.props.children, x, y, html.props.style);
+    } else if (typeof html.props.children === 'undefined') { // when SVG
+        console.log(renderToStaticMarkup(html));
     } else {
         drawHtml(context, html.props.children)
     }
@@ -22,12 +25,14 @@ export const drawHtml: DrawHtml = (context, html, x = 0, y = 0, styles = {}) => 
 const drawText = (
     context: CanvasRenderingContext2D,
     text: string,
+    x: number,
+    y: number,
     styles?: CSS.Properties
 ) => {
     if (styles) stylize(context, styles);
 
-    measureText(context, text);
-    context.fillText(text, 100, 100);
+    // measureText(context, text);
+    context.fillText(text, x, y);
 
     return context
 }
@@ -43,14 +48,19 @@ const stylize = (
 ): CanvasRenderingContext2D => {
     let property: keyof CSS.Properties;
     for (property in styles) {
-        // console.log(property);
-        // console.log(styles[property]);
+        if (property === 'color') context.fillStyle = String(styles[property])
+        if (property === 'font') context.font = String(styles[property])
+        if (property === 'textAlign') context.textAlign = canvasTextAlign(styles[property])
     }
-    context.font = '60px sans-serif'
-    context.fillStyle = 'red'
     context.textBaseline = 'top'
-    context.textAlign = 'left'
     return context
+}
+
+const canvasTextAlign: (value: string | undefined) => CanvasTextAlign = (value) => {
+    if (value === "center" || value === "end" || value === "left" || value === "right" || value === "start") {
+        return value;
+    }
+    throw new Error(`${value} is not an CanvasTextAlign`);
 }
 
 const measureText = (

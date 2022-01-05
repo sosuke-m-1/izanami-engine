@@ -33,7 +33,7 @@ export const drawRectangle = (
     color: Color = null
 ): CanvasRenderingContext2D => {
     if (color !== null) {
-        context.strokeStyle = color
+        context.fillStyle = color
     }
     context.fillRect(x, y, width, height)
 
@@ -78,4 +78,24 @@ export const drawCircle = (
     context.fill();
 
     return context;
+}
+
+type LoadImageCallback = (
+    context: CanvasRenderingContext2D,
+    image: HTMLImageElement
+) => CanvasRenderingContext2D
+
+export const loadImage = (
+    context: CanvasRenderingContext2D,
+    path: string,
+    callback: LoadImageCallback
+): CanvasRenderingContext2D => {
+    let target = new Image();
+    target.addEventListener('load', () => {
+        if (callback != null) {
+            callback(context, target);
+        }
+    }, false);
+    target.src = path;
+    return context
 }

@@ -9,3 +9,31 @@ export const makeContext = (id: string): CanvasRenderingContext2D => {
     }
     return context
 }
+
+export class Izanami {
+    routine: () => void = () => { };
+    startTime = Date.now();
+
+    constructor(
+    ) {
+    }
+
+    setRoutine(callback: () => void) {
+        this.routine = callback;
+    }
+
+    clear = () => {
+
+    }
+
+    run = () => {
+        this.routine()
+        requestAnimationFrame(this.run);
+    }
+}
+
+type fns = (context: CanvasRenderingContext2D, ...args: any) => CanvasRenderingContext2D
+type compose = (...fns: fns[]) => (arg: any) => void
+export const compose: compose = (...fns) => arg => {
+    fns.reduce((composed, f) => f(composed), arg)
+}
